@@ -62,135 +62,129 @@ def createContainers(config):
 
 
 def createDockerCompose(config):
-    script = (
-        f"""
-    version: '3.7'
+    script = f"""version: '3.7'
 
-    services:
-    {createContainers(config)}
-            logstash:
-                build:
-                    context: LogstashDocker
-                    dockerfile: Dockerfile
-                image: {IMAGE_LOGSTASH}
-                volumes:
-                    - $PWD/LogstashDocker/pipeline/:/usr/share/logstash/pipeline/
-                environment:
-                    # limite RAM di 1gb.
-                    - "LS_JAVA_OPTS=-Xms1g -Xmx1g"
-                ports:
-                    - "10155:10155"
-                networks:
-                    - warplatforms-network
-                profiles: ["ingestion", "all"]
+services:
+{createContainers(config)}
+    logstash:
+        build:
+            context: LogstashDocker
+            dockerfile: Dockerfile
+        image: {IMAGE_LOGSTASH}
+        volumes:
+            - $PWD/LogstashDocker/pipeline/:/usr/share/logstash/pipeline/
+        environment:
+            # limite RAM di 1gb.
+            - "LS_JAVA_OPTS=-Xms1g -Xmx1g"
+        ports:
+            - "10155:10155"
+        networks:
+            - warplatforms-network
+        profiles: ["ingestion", "all"]
 
-            zookeeper:
-                image: {IMAGE_ZOOKEEPER}
-                # container_name: zookeeper
-                environment:
-                    ZOOKEEPER_CLIENT_PORT: 2181
-                    ZOOKEEPER_TICK_TIME: 2000
-                networks:
-                    - warplatforms-network
+    zookeeper:
+        image: {IMAGE_ZOOKEEPER}
+        # container_name: zookeeper
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        networks:
+            - warplatforms-network
 
-            kafkaserver:
-                image: {IMAGE_KAFKA}
-                # container_name: kafkaserver
-                ports:
-                    - "9092:9092"
-                depends_on:
-                    - zookeeper
-                environment:
-                    KAFKA_BROKER_ID: 1
-                    KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-                    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,"""
-        + """PLAINTEXT_INTERNAL:PLAINTEXT
-                    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,"""
-        + """PLAINTEXT_INTERNAL://kafkaserver:29092
-                    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-                    KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-                    KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-                networks:
-                    - warplatforms-network
+    kafkaserver:
+        image: {IMAGE_KAFKA}
+        # container_name: kafkaserver
+        ports:
+            - "9092:9092"
+        depends_on:
+            - zookeeper
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafkaserver:29092
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+        networks:
+            - warplatforms-network
 
-            kafka-ui:
-                image: {IMAGE_KAFKAUI}
-                # container_name: kafka-ui
-                depends_on:
-                    - zookeeper
-                    - kafkaserver
-                ports:
-                    - "8080:8080"
-                restart: always
-                environment:
-                    KAFKA_CLUSTERS_0_NAME: local
-                    KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafkaserver:29092
-                    KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-                networks:
-                    - warplatforms-network
+    kafka-ui:
+        image: {IMAGE_KAFKAUI}
+        # container_name: kafka-ui
+        depends_on:
+            - zookeeper
+            - kafkaserver
+        ports:
+            - "8080:8080"
+        restart: always
+        environment:
+            KAFKA_CLUSTERS_0_NAME: local
+            KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafkaserver:29092
+            KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+        networks:
+            - warplatforms-network
 
-            kafka-init:
-                image: {IMAGE_KAFKAINIT}
-                depends_on:
-                    - kafkaserver
-                    - zookeeper
-                    - kafka-ui
-                entrypoint: [ '/bin/sh', '-c' ]
-                command: |
-                    "
-                    # blocks until kafka is reachable
-                    kafka-topics --bootstrap-server kafkaserver:29092 --list
-                    echo -e 'Creating kafka topics'
-                    kafka-topics --bootstrap-server kafkaserver:29092 --create --if-"""
-        + """not-exists --topic telegram-messages --replication-factor 1 --partitions 1
-                    echo -e 'Successfully created the following topics:'
-                    kafka-topics --bootstrap-server kafkaserver:29092 --list
-                    "
-                networks:
-                    - warplatforms-network
+    kafka-init:
+        image: {IMAGE_KAFKAINIT}
+        depends_on:
+            - kafkaserver
+            - zookeeper
+            - kafka-ui
+        entrypoint: [ '/bin/sh', '-c' ]
+        command: |
+            "
+            # blocks until kafka is reachable
+            kafka-topics --bootstrap-server kafkaserver:29092 --list
+            echo -e 'Creating kafka topics'
+            kafka-topics --bootstrap-server kafkaserver:29092 --create --if-not-exists --topic telegram-messages --replication-factor 1 --partitions 1
+            echo -e 'Successfully created the following topics:'
+            kafka-topics --bootstrap-server kafkaserver:29092 --list
+            "
+        networks:
+            - warplatforms-network
 
-            elasticsearch:
-                image: {IMAGE_ELASTICSEARCH}
-                ports:
-                    - '9200:9200'
-                environment:
-                    - discovery.type=single-node
-                    - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-                mem_limit: 4g
-                ulimits:
-                    memlock:
-                        soft: -1
-                        hard: -1
-                networks:
-                    - warplatforms-network
-                profiles: ["storage", "all"]
+    elasticsearch:
+        image: {IMAGE_ELASTICSEARCH}
+        ports:
+            - '9200:9200'
+        environment:
+            - discovery.type=single-node
+            - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+        mem_limit: 4g
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        networks:
+            - warplatforms-network
+        profiles: ["storage", "all"]
 
-            kibana:
-                image: {IMAGE_KIBANA}
-                ports:
-                    - '5601:5601'
-                networks:
-                    - warplatforms-network
-                mem_limit: 1g
-                profiles: ["visualization", "all"]
+    kibana:
+        image: {IMAGE_KIBANA}
+        ports:
+            - '5601:5601'
+        networks:
+            - warplatforms-network
+        mem_limit: 1g
+        profiles: ["visualization", "all"]
 
-            spark:
-                build:
-                    context: spark
-                networks:
-                    - warplatforms-network
-                depends_on:
-                    - elasticsearch
-                    - kibana
-                    - zookeeper
-                    - kafkaserver
-                profiles: ["computation", "all"]
+    spark:
+        build:
+            context: spark
+        networks:
+            - warplatforms-network
+        depends_on:
+            - elasticsearch
+            - kibana
+            - zookeeper
+            - kafkaserver
+        profiles: ["computation", "all"]
 
-    networks:
-        warplatforms-network:
-            name: warplatforms-network
-            driver: bridge"""
-    )
+networks:
+    warplatforms-network:
+        name: warplatforms-network
+        driver: bridge"""
     return script
 
 
