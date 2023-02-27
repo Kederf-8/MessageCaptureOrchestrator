@@ -14,7 +14,6 @@ from pyspark.ml import (
     Word2Vec,
 )
 from pyspark.sql import SparkSession
-from pyspark.sql.session import SparkSession
 
 schema = tp.StructType(
     [
@@ -41,7 +40,8 @@ def getPipeline(inputCol="input", labelCol="label"):
 
     # tokenizer = Tokenizer(inputCol=inputCol, outputCol="words")
     # hashtf = HashingTF(numFeatures=2**16, inputCol="words", outputCol='tf')
-    # idf = IDF(inputCol='tf', outputCol="features", minDocFreq=5) #minDocFreq: remove sparse terms
+    # idf = IDF(inputCol='tf', outputCol="features", minDocFreq=5)
+    # minDocFreq: remove sparse terms
     # label_stringIdx = StringIndexer(inputCol = "target", outputCol = labelCol)
     # pipelineFit = pipeline.fit(train_set)
     # return Pipeline(stages=[tokenizer, hashtf, idf, label_stringIdx])
@@ -167,7 +167,7 @@ def cleanText(text):
     stripped = re.sub(combined_pat, "", souped)
     try:
         clean = stripped.decode("utf-8-sig").replace("\ufffd", "?")
-    except:
+    except Exception:
         clean = stripped
     letters_only = re.sub("[^a-zA-Z]", " ", clean)
     lower_case = letters_only.lower()

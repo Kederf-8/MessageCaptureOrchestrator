@@ -22,14 +22,7 @@ class tgFetch:
     def getChannelNameFromUrl(url):
         prev = "t.me/s/"
         chname = url[url.find(prev) + len(prev) :]
-        # print(chname)
         return chname
-
-    def __init__(self, URL):
-        self.formatUrl(URL)
-        self.HOST = "localhost"
-        self.PORT = 5000
-        self.translator = None  # non effettua alcuna traduzione del testo
 
     def __init__(self, URL, HOST, PORT, translator=None):
         self.formatUrl(URL)

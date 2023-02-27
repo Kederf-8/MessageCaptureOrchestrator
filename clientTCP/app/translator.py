@@ -19,8 +19,10 @@ class translator:
 
     # FROM              lingua/e da cui tradurre
     # TO                lingua in cui tradurre
-    # list              lista di dizionari contenenti, ciascuno, nome del servizio di traduzione e relativo voto
-    # partial_sums      serve al metodo randomTranslate per la scelta randomica del servizio di traduzione
+    # list              lista di dizionari contenenti, ciascuno,
+    #                   nome del servizio di traduzione e relativo voto
+    # partial_sums      serve al metodo randomTranslate per la scelta
+    #                   randomica del servizio di traduzione
 
     def sumAllVotes(self):
         sum = 0
@@ -47,14 +49,15 @@ class translator:
                     warnings.warn(f"Warning, unexpected language: {elem} not in list")
         return requiredLanguages
 
-    # memorizza in self.list un array di dizionari contenenti, per ogni traduttore, il nome e il relativo voto.
-    # Più il voto di un servizio di traduzione è alto più è probabile che venga scelto nel randomTranslate()
+    # memorizza in self.list un array di dizionari contenenti, per ogni traduttore,
+    # il nome e il relativo voto. Più il voto di un servizio di traduzione è alto
+    # più è probabile che venga scelto nel randomTranslate()
+
     def __init__(self, file="", dict="", FROM="auto", TO="en"):
         if file != "":
             with open(file, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-                # self.list = [{}] * len(lines);
-                #  requiredLanguages = ['ru','en','uk']
+
                 self.FROM = FROM
                 self.TO = TO
                 requiredLanguages = translator.getRequiredLanguages(FROM, TO)
@@ -80,11 +83,13 @@ class translator:
             else:
                 from_lang = "auto"
         while True:
-            # sceglie un intero random tra 0 e la somma totale dei voti -1(che corrisponde all'ultima somma parziale -1)
+            # sceglie un intero random tra 0 e la somma totale dei voti -1
+            # (che corrisponde all'ultima somma parziale -1)
             rand_val = rand.randint(
                 0, self.partial_sums[len(self.partial_sums) - 1] - 1
             )
-            # trova la posizione in cui il numero random verrebbe inserito se fosse aggiunto alla lista delle somme parziali
+            # trova la posizione in cui il numero random verrebbe inserito se fosse
+            # aggiunto alla lista delle somme parziali
             # => la posizione trovata corrisponde all'indice del traduttore da usare
             pos = bisect(self.partial_sums, rand_val)
             # preleva dalla lista il nome del servizio
@@ -98,7 +103,9 @@ class translator:
             except Exception as e:
                 print(f"({service} translator): {e}")
 
-        # Da sistemare "auto" per reverso, warning:  warnings.warn('Unsupported [from_language=auto] with [reverso]! Please specify it.')
+        # Da sistemare "auto" per reverso, warning:
+        # warnings.warn(
+        #       'Unsupported [from_language=auto] with [reverso]! Please specify it.')
 
     def allServicesTranslate(self, text):
         for elem in self.list:
@@ -108,15 +115,13 @@ class translator:
                     text=text, translator=service, FROM=self.FROM, TO=self.TO
                 )
                 print({"service": service, "translation": translation})
-            except:
+            except Exception:
                 print(f"Non funziona {service}")
         return False
 
     def translate(text, FROM="auto", TO="en", translator="google"):
         # es.   ts.google(text)
-        return getattr(ts, translator)(
-            text, from_language=FROM, to_language=TO
-        )  # ,from_language=FROM,to_language=TO
+        return getattr(ts, translator)(text, from_language=FROM, to_language=TO)
 
     def translateHTML(html_text, translator="google", to_language="en"):
         return ts.translate_html(

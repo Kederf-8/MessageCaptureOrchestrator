@@ -116,7 +116,7 @@ def outputStream(stream, mode="", index=""):
         response = es.indices.create(index=index, ignore=400)
 
         if "acknowledged" in response:
-            if response["acknowledged"] == True:
+            if response["acknowledged"] is True:
                 print("Successfully created index:", response["index"])
 
         return (

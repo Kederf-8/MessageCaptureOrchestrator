@@ -37,7 +37,7 @@ def createScriptContainer(config, channel_name, port):
             {service_name}:
                 build:
                     context: clientTCP
-                    dockerfile: Dockerfile  
+                    dockerfile: Dockerfile
                 image: {IMAGE_CLIENT_TCP}
                 networks:
                     - warplatforms-network
@@ -62,7 +62,8 @@ def createContainers(config):
 
 
 def createDockerCompose(config):
-    script = f"""
+    script = (
+        f"""
     version: '3.7'
 
     services:
@@ -82,7 +83,7 @@ def createDockerCompose(config):
                 networks:
                     - warplatforms-network
                 profiles: ["ingestion", "all"]
-            
+
             zookeeper:
                 image: {IMAGE_ZOOKEEPER}
                 # container_name: zookeeper
@@ -91,7 +92,7 @@ def createDockerCompose(config):
                     ZOOKEEPER_TICK_TIME: 2000
                 networks:
                     - warplatforms-network
-                
+
             kafkaserver:
                 image: {IMAGE_KAFKA}
                 # container_name: kafkaserver
@@ -102,14 +103,16 @@ def createDockerCompose(config):
                 environment:
                     KAFKA_BROKER_ID: 1
                     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-                    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-                    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafkaserver:29092
+                    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,"""
+        + """PLAINTEXT_INTERNAL:PLAINTEXT
+                    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,"""
+        + """PLAINTEXT_INTERNAL://kafkaserver:29092
                     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
                     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
                     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
                 networks:
                     - warplatforms-network
-            
+
             kafka-ui:
                 image: {IMAGE_KAFKAUI}
                 # container_name: kafka-ui
@@ -125,7 +128,7 @@ def createDockerCompose(config):
                     KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
                 networks:
                     - warplatforms-network
-            
+
             kafka-init:
                 image: {IMAGE_KAFKAINIT}
                 depends_on:
@@ -138,54 +141,56 @@ def createDockerCompose(config):
                     # blocks until kafka is reachable
                     kafka-topics --bootstrap-server kafkaserver:29092 --list
                     echo -e 'Creating kafka topics'
-                    kafka-topics --bootstrap-server kafkaserver:29092 --create --if-not-exists --topic telegram-messages --replication-factor 1 --partitions 1
+                    kafka-topics --bootstrap-server kafkaserver:29092 --create --if-"""
+        + """not-exists --topic telegram-messages --replication-factor 1 --partitions 1
                     echo -e 'Successfully created the following topics:'
                     kafka-topics --bootstrap-server kafkaserver:29092 --list
                     "
                 networks:
                     - warplatforms-network
-                
-            elasticsearch: 
-                image: {IMAGE_ELASTICSEARCH} 
-                ports: 
+
+            elasticsearch:
+                image: {IMAGE_ELASTICSEARCH}
+                ports:
                     - '9200:9200'
-                environment: 
+                environment:
                     - discovery.type=single-node
-                    - "ES_JAVA_OPTS=-Xms2g -Xmx2g" 
+                    - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
                 mem_limit: 4g
-                ulimits: 
-                    memlock: 
-                        soft: -1 
-                        hard: -1 
-                networks: 
+                ulimits:
+                    memlock:
+                        soft: -1
+                        hard: -1
+                networks:
                     - warplatforms-network
-                profiles: ["storage", "all"] 
-                
-            kibana: 
-                image: {IMAGE_KIBANA} 
-                ports: 
-                    - '5601:5601' 
-                networks: 
+                profiles: ["storage", "all"]
+
+            kibana:
+                image: {IMAGE_KIBANA}
+                ports:
+                    - '5601:5601'
+                networks:
                     - warplatforms-network
                 mem_limit: 1g
-                profiles: ["visualization", "all"] 
-                
+                profiles: ["visualization", "all"]
+
             spark:
-                build: 
+                build:
                     context: spark
-                networks: 
+                networks:
                     - warplatforms-network
                 depends_on:
                     - elasticsearch
                     - kibana
                     - zookeeper
                     - kafkaserver
-                profiles: ["computation", "all"] 
+                profiles: ["computation", "all"]
 
     networks:
         warplatforms-network:
             name: warplatforms-network
             driver: bridge"""
+    )
     return script
 
 
@@ -270,7 +275,8 @@ def extractEnvironmentVariable(container, var_name):
 def printLastIds():
     for container in getContainersFromImage(IMAGE_CLIENT_TCP):
         print(
-            f"{container.attrs['Config']['Labels']['com.docker.compose.service']} LAST_ID: {extractEnvironmentVariable(container,'ENV_LAST_ID')}"
+            f"{container.attrs['Config']['Labels']['com.docker.compose.service']} "
+            + "LAST_ID: {extractEnvironmentVariable(container,'ENV_LAST_ID')}"
         )
 
 
@@ -284,12 +290,13 @@ def updateLastIds():
                 obj = json.load(
                     open(f"clientTCP/data/{section.lower()}/information.json")
                 )
-                # transaction_id permette di capire se il dato è stato modificato o no rispetto all'ultimo aggiornamento
+                # transaction_id permette di capire se il dato è stato modificato o
+                # no rispetto all'ultimo aggiornamento
                 if config[section]["transaction_id"] != str(obj["transaction_id"]):
                     config[section]["last_id"] = str(obj["last_id"])
                     config[section]["transaction_id"] = str(obj["transaction_id"])
                     modified = True
-            except Exception as e:
+            except Exception:
                 continue
     if modified:
         # aggiorna il config.ini
@@ -327,18 +334,24 @@ def containerRestart(params):
 
 commands_info = {
     " - start": "Esegue i container previsti nel docker compose in modalità detatch.",
-    " - up": "Esegue i container previsti nel docker compose in modalità detatch. Rimuove i container orfani",
+    " - up": "Esegue i container previsti nel docker compose in modalità detatch. "
+    + "Rimuove i container orfani",
     " - list": "Mostra la lista dei container in esecuzione e interrotti",
     " - shell": "Esegue un normale comando su shell \n\t(shell <comando>)",
     " - stop": "Permette di stoppare uno o più container \n\t(stop [<nome_servizio>])",
-    " - run-profile": "Permette di eseguire soltanto i container del docker-compose relativi ad uno specifico profilo \n\t(run-profile <nome_profilo>)",
+    " - run-profile": "Permette di eseguire soltanto i container del docker-compose "
+    + "relativi ad uno specifico profilo \n\t(run-profile <nome_profilo>)",
     " - channels": "Stampa i canali gestiti",
-    " - conf": "Visualizza i parametri di configurazione di uno specifico canale \n\t(conf <nome_canale>)",
+    " - conf": "Visualizza i parametri di configurazione di uno specifico canale "
+    + "\n\t(conf <nome_canale>)",
     " - add": "Aggiunge un nuovo canale \n\t(add <nome_canale>)",
     " - run": "Esegui i container passati in input  \n\t(run [<nome_canale>])",
-    " - update": "carica la versione corrente del config.ini, utile in caso di modifiche effettuate direttamente sul file",
+    " - update": "carica la versione corrente del config.ini, utile in caso di "
+    + "modifiche effettuate direttamente sul file",
     " - exit": "Termina l'esecuzione",
-    " - restart": "Stoppa(o killa) i container passati in input \n\t(restart       [<nome_canale>]) STOP AND RUN \n\t(restart --force [<nome_canale>]) KILL AND RUN",
+    " - restart": "Stoppa(o killa) i container passati in input "
+    + "\n\t(restart       [<nome_canale>]) STOP AND RUN \n\t(restart --force "
+    + "[<nome_canale>]) KILL AND RUN",
     " - kill": "Stoppa immediatamente i container passati in input",
 }
 
@@ -386,7 +399,7 @@ def execCommand(command):
         return
     if params[0].lower() in commands:
         answer = commands[params[0].lower()](params[1:])
-        # print(answer)
+        print(answer)
     else:
         print(f"\tIl comando {command} non è previsto")
     return
@@ -406,7 +419,8 @@ if __name__ == "__main__":
     config.read("config.ini")
     saveDockerCompose()
 
-    # Avviare il thread che effettua una serie di azioni e controlli in background(tra cui l'aggiornamento dei last_id)
+    # Avviare il thread che effettua una serie di azioni e controlli in background
+    # (tra cui l'aggiornamento dei last_id)
     pipelineThread = threading.Thread(target=commandsPipeline, args=(4,))
     # se il thread è un deamon dovrebbe terminare quando il main thread termina
     pipelineThread.daemon = True

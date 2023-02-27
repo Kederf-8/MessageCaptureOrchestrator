@@ -108,7 +108,7 @@ class whoIsManager:
         for field in whoIsManager.relevant_fields:
             try:
                 dict[field] = str(getattr(self, field)(URL))
-            except:
+            except Exception:
                 dict[field] = "aa"
         return json.dumps(dict, indent=4)
 

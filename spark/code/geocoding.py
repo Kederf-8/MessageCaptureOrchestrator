@@ -6,7 +6,10 @@ import requests
 
 
 def fetchDataset():
-    url = "https://parseapi.back4app.com/classes/City?limit=1512&keys=name,population,location,cityId"
+    url = (
+        "https://parseapi.back4app.com/classes/City?limit=1512&keys=name,"
+        + +"population,location,cityId"
+    )
     headers = {
         # This is the fake app's application id
         "X-Parse-Application-Id": "WHhatLdoYsIJrRzvkD0Y93uKHTX49V9gmHgp8Rw3",
@@ -37,7 +40,7 @@ def LoadUkraineCities():
     for dataset in datasets:
         try:
             return pandas.read_csv(dataset, engine="python")
-        except:
+        except Exception:
             print(f"Dataset {dataset} non è stato trovato")
     print("Nessun dataset trovato")
     return False
@@ -66,7 +69,7 @@ def getLocation(cityname):
 
 def getLocationAsString(cityname):
     location = getLocation(cityname)
-    if location == False:
+    if location is False:
         return None
     return f"POINT({location['longitude']} {location['latitude']})"
 
