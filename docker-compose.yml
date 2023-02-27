@@ -17,8 +17,8 @@
                     - $PWD/clientTCP/data/ukraina24tv/:/data
                 environment:
                     - ENV_TRANSLATION=True
-                    - ENV_LAST_ID=37386
-                    - ENV_TRANSACTION_ID=1999
+                    - ENV_LAST_ID=81
+                    - ENV_TRANSACTION_ID=4
                     - ENV_OVERWRITE_LAST_ID=True
                     - ENV_METHOD=all
                     - ENV_BATCH=True
@@ -46,8 +46,8 @@
                     - $PWD/clientTCP/app/:/app/
                     - $PWD/clientTCP/data/ukrwarrep/:/data
                 environment:
-                    - ENV_LAST_ID=5618
-                    - ENV_TRANSACTION_ID=479
+                    - ENV_LAST_ID=0
+                    - ENV_TRANSACTION_ID=2
                     - ENV_OVERWRITE_LAST_ID=True
                     - ENV_METHOD=all
                     - ENV_BATCH=True
@@ -76,8 +76,8 @@
                     - $PWD/clientTCP/app/:/app/
                     - $PWD/clientTCP/data/oligarchjets/:/data
                 environment:
-                    - ENV_LAST_ID=609
-                    - ENV_TRANSACTION_ID=219
+                    - ENV_LAST_ID=566
+                    - ENV_TRANSACTION_ID=28
                     - ENV_OVERWRITE_LAST_ID=True
                     - ENV_METHOD=all
                     - ENV_BATCH=True
@@ -106,8 +106,8 @@
                     - $PWD/clientTCP/app/:/app/
                     - $PWD/clientTCP/data/ukrainenowitalian/:/data
                 environment:
-                    - ENV_LAST_ID=9479
-                    - ENV_TRANSACTION_ID=664
+                    - ENV_LAST_ID=567
+                    - ENV_TRANSACTION_ID=27
                     - ENV_OVERWRITE_LAST_ID=True
                     - ENV_METHOD=all
                     - ENV_BATCH=True
@@ -137,8 +137,8 @@
                     - $PWD/clientTCP/data/ukrainenow/:/data
                 environment:
                     - ENV_TRANSLATION=True
-                    - ENV_LAST_ID=13467
-                    - ENV_TRANSACTION_ID=841
+                    - ENV_LAST_ID=55
+                    - ENV_TRANSACTION_ID=3
                     - ENV_OVERWRITE_LAST_ID=True
                     - ENV_METHOD=all
                     - ENV_BATCH=True
@@ -151,66 +151,6 @@
                     - ENV_QUERY=None
 
                 command: python -u main.py UkraineNow
-                profiles: ["fetching", "all"]
-                
-            financialtimes:
-                build:
-                    context: clientTCP
-                    dockerfile: Dockerfile  
-                image: client-tcp
-                # ports:
-                #     - "5005:5005"
-                networks:
-                    - warplatforms-network
-                volumes:
-                    - $PWD/clientTCP/app/:/app/
-                    - $PWD/clientTCP/data/financialtimes/:/data
-                environment:
-                    - ENV_LAST_ID=0
-                    - ENV_TRANSACTION_ID=200
-                    - ENV_OVERWRITE_LAST_ID=True
-                    - ENV_METHOD=all
-                    - ENV_BATCH=True
-                    - ENV_DELAY=5
-                    - ENV_TO_FILE=None
-                    - ENV_STDOUT=False
-                    - ENV_SENDTCP=True
-                    - ENV_TRANSLATION=False
-                    - ENV_TRANSLATE_FROM=uk
-                    - ENV_TRANSLATE_TO=en
-                    - ENV_QUERY=None
-
-                command: python -u main.py financialtimes
-                profiles: ["fetching", "all"]
-                
-            interessantetelegramchannel:
-                build:
-                    context: clientTCP
-                    dockerfile: Dockerfile  
-                image: client-tcp
-                # ports:
-                #     - "5006:5006"
-                networks:
-                    - warplatforms-network
-                volumes:
-                    - $PWD/clientTCP/app/:/app/
-                    - $PWD/clientTCP/data/interessantetelegramchannel/:/data
-                environment:
-                    - ENV_LAST_ID=296
-                    - ENV_BATCH=False
-                    - ENV_TRANSACTION_ID=220
-                    - ENV_TRANSLATION=True
-                    - ENV_OVERWRITE_LAST_ID=True
-                    - ENV_METHOD=all
-                    - ENV_DELAY=5
-                    - ENV_TO_FILE=None
-                    - ENV_STDOUT=False
-                    - ENV_SENDTCP=True
-                    - ENV_TRANSLATE_FROM=uk
-                    - ENV_TRANSLATE_TO=en
-                    - ENV_QUERY=None
-
-                command: python -u main.py InteressanteTelegramChannel
                 profiles: ["fetching", "all"]
                 
             logstash:

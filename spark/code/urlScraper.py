@@ -17,29 +17,36 @@ www.website.gov.uk/login.html
 test with ipv4 (192.168.1.1/test.jpg).
 search at lorenzo.tap.com/ukraine"""
 
-regexURL=r"\b((?:https?://)?(?:(?:www\.)?(?:[\da-z\.-]+)\.(?:[a-z]{2,6})|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(?::[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])?(?:/[\w\.-]*)*/?)\b"
+regexURL = r"\b((?:https?://)?(?:(?:www\.)?(?:[\da-z\.-]+)\.(?:[a-z]{2,6})|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(?::[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])?(?:/[\w\.-]*)*/?)\b"
 
-#ritorna l'array degli URL
+# ritorna l'array degli URL
 def findAllUrls(text):
     matches = re.findall(regexURL, text)
     return matches
 
-def ensureProtocol(url,protocol="https"):
+
+def ensureProtocol(url, protocol="https"):
     # print(f"[ENSURE PROTOCOL] {url}")
     base = "http"
-    if isinstance(url,str):
-        if url[:len(base)] != base:
+    if isinstance(url, str):
+        if url[: len(base)] != base:
             url = f"{protocol}://{url}"
-    if isinstance(url,list):
-        for i in range(0,len(url)):
-            if url[i][:len(base)] != base:
+    if isinstance(url, list):
+        for i in range(0, len(url)):
+            if url[i][: len(base)] != base:
                 url[i] = f"{protocol}://{url[i]}"
     return url
 
 
-
 def tag_visible(element):
-    if element.parent.name in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+    if element.parent.name in [
+        "style",
+        "script",
+        "head",
+        "title",
+        "meta",
+        "[document]",
+    ]:
         return False
     if isinstance(element, Comment):
         return False
@@ -47,10 +54,10 @@ def tag_visible(element):
 
 
 def text_from_html(body):
-    soup = BeautifulSoup(body, 'html.parser')
+    soup = BeautifulSoup(body, "html.parser")
     texts = soup.findAll(text=True)
-    visible_texts = filter(tag_visible, texts)  
-    return u" ".join(t.strip() for t in visible_texts)
+    visible_texts = filter(tag_visible, texts)
+    return " ".join(t.strip() for t in visible_texts)
     # return [t.strip() for t in visible_texts]
 
 
@@ -65,12 +72,11 @@ def loadAndParse(address):
             # return None
             return "null"
         return text_from_html(response.text)
-    except Exception as e: 
+    except Exception as e:
         print(f"(loadAndParse): {e}")
         return "null"
 
 
-
-
 # if __name__ == '__main__': findAllUrls(esempioInput)
-if __name__ == '__main__': loadAndParse(input("#>"))
+if __name__ == "__main__":
+    loadAndParse(input("#>"))

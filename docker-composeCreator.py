@@ -222,7 +222,7 @@ def createDockerCompose(config):
 def saveDockerCompose():
     global config
     docker_compose = createDockerCompose(config)
-    with open("docker-compose.yml", 'w') as f:
+    with open("docker-compose.yml", "w") as f:
         f.write(docker_compose)
 
 
@@ -241,8 +241,8 @@ def getConfAbout(chname):
                 option, param = item
                 print(f"\t{option} : {param}")
             return True
-    print(
-        f"Non è stata trovata alcuna configurazione corrispondente a {chname} ")
+    print(f"Non è stata trovata alcuna configurazione corrispondente a {chname} ")
+
 
 # TODO
 # change channel conf method
@@ -257,9 +257,8 @@ def readChannels():
 def insertOptions():
     newSection = {}
     while True:
-        attr = input(
-            "Inserisci un attributo (o 'done' per completare la creazione):")
-        if attr == 'done':
+        attr = input("Inserisci un attributo (o 'done' per completare la creazione):")
+        if attr == "done":
             return newSection
         value = input(f"Inserisci il valore da assegnare a {attr}:")
         newSection[attr] = value
@@ -276,7 +275,7 @@ def addNewChannel(params):
     config[chname] = insertOptions()
 
     # aggiorna il config.ini
-    with open('config.ini', 'w') as configfile:
+    with open("config.ini", "w") as configfile:
         config.write(configfile)
 
     # modifica il docker-compose.yml
@@ -290,22 +289,25 @@ def addNewChannel(params):
 def getContainersFromImage(image_name):
     global dockerClient
     containers_list = dockerClient.containers.list()
-    return list(filter(lambda x: x.attrs['Config']['Image'] == image_name, containers_list))
+    return list(
+        filter(lambda x: x.attrs["Config"]["Image"] == image_name, containers_list)
+    )
 
 
 def extractEnvironmentVariable(container, var_name):
     container.reload()
     substr = f"{var_name}="
-    for env in container.attrs['Config']['Env']:
+    for env in container.attrs["Config"]["Env"]:
         if var_name in env:
-            return env[len(substr):]
+            return env[len(substr) :]
     return False
 
 
 def printLastIds():
     for container in getContainersFromImage(IMAGE_CLIENT_TCP):
         print(
-            f"{container.attrs['Config']['Labels']['com.docker.compose.service']} LAST_ID: {extractEnvironmentVariable(container,'ENV_LAST_ID')}")
+            f"{container.attrs['Config']['Labels']['com.docker.compose.service']} LAST_ID: {extractEnvironmentVariable(container,'ENV_LAST_ID')}"
+        )
 
 
 def updateLastIds():
@@ -316,40 +318,49 @@ def updateLastIds():
             obj = {}
             try:
                 obj = json.load(
-                    open(f"clientTCP/data/{section.lower()}/information.json"))
+                    open(f"clientTCP/data/{section.lower()}/information.json")
+                )
                 # transaction_id permette di capire se il dato è stato modificato o no rispetto all'ultimo aggiornamento
-                if config[section]['transaction_id'] != str(obj['transaction_id']):
+                if config[section]["transaction_id"] != str(obj["transaction_id"]):
                     # print(f"[{section}]--> {config[section]['last_id']} to {obj['last_id']}")
-                    config[section]['last_id'] = str(obj['last_id'])
-                    config[section]['transaction_id'] = str(
-                        obj['transaction_id'])
+                    config[section]["last_id"] = str(obj["last_id"])
+                    config[section]["transaction_id"] = str(obj["transaction_id"])
                     modified = True
             except Exception as e:
                 # print(f"(updateLastIds[{section}]): {e}")
                 continue
     if modified:
         # aggiorna il config.ini
-        with open('config.ini', 'w') as configfile:
+        with open("config.ini", "w") as configfile:
             config.write(configfile)
         # modifica il docker-compose.yml
         saveDockerCompose()
 
 
 def containerRestart(params):
-    if params[0][0] == '-':
+    if params[0][0] == "-":
         if params[0] == "-f" or params[0] == "-force" or params[0] == "--force":
-            subprocess.run(["docker-compose", "kill"] +
-                           list(map(lambda t: t.lower(), params[1:])))
+            subprocess.run(
+                ["docker-compose", "kill"] + list(map(lambda t: t.lower(), params[1:]))
+            )
         else:
-            subprocess.run(["docker-compose", "stop"] +
-                           list(map(lambda t: t.lower(), params[1:])))
-        subprocess.run(["docker-compose", "up"] +
-                       list(map(lambda t: t.lower(), params[1:]))+["--detach"])
+            subprocess.run(
+                ["docker-compose", "stop"] + list(map(lambda t: t.lower(), params[1:]))
+            )
+        subprocess.run(
+            ["docker-compose", "up"]
+            + list(map(lambda t: t.lower(), params[1:]))
+            + ["--detach"]
+        )
     else:
-        subprocess.run(["docker-compose", "stop"] +
-                       list(map(lambda t: t.lower(), params)))
-        subprocess.run(["docker-compose", "up"] +
-                       list(map(lambda t: t.lower(), params))+["--detach"])
+        subprocess.run(
+            ["docker-compose", "stop"] + list(map(lambda t: t.lower(), params))
+        )
+        subprocess.run(
+            ["docker-compose", "up"]
+            + list(map(lambda t: t.lower(), params))
+            + ["--detach"]
+        )
 
 
 commands_info = {
@@ -360,7 +371,7 @@ commands_info = {
     " - stop": "Permette di stoppare uno o più container \n\t(stop [<nome_servizio>])",
     " - run-profile": "Permette di eseguire soltanto i container del docker-compose relativi ad uno specifico profilo \n\t(run-profile <nome_profilo>)",
     " - channels": "Stampa i canali gestiti",
-    " - conf":  "Visualizza i parametri di configurazione di uno specifico canale \n\t(conf <nome_canale>)",
+    " - conf": "Visualizza i parametri di configurazione di uno specifico canale \n\t(conf <nome_canale>)",
     " - add": "Aggiunge un nuovo canale \n\t(add <nome_canale>)",
     " - run": "Esegui i container passati in input  \n\t(run [<nome_canale>])",
     " - update": "carica la versione corrente del config.ini, utile in caso di modifiche effettuate direttamente sul file",
@@ -378,15 +389,27 @@ def printCommandsInfo():
 
 commands = {
     "shell": lambda x: subprocess.run(x),
-    "up": lambda x: subprocess.run(["docker-compose", "--profile", "all", "up", "--detach"]),
-    "start": lambda x: subprocess.run(["docker-compose", "--profile", "fetching", "up", "--detach"]),
-    "run-profile": lambda x: subprocess.run(["docker-compose", "--profile", x[0], "up", "--detach"]),
-    "run": lambda x: subprocess.run(["docker-compose", "up"]+list(map(lambda t: t.lower(), x))+["--detach"]),
+    "up": lambda x: subprocess.run(
+        ["docker-compose", "--profile", "all", "up", "--detach"]
+    ),
+    "start": lambda x: subprocess.run(
+        ["docker-compose", "--profile", "fetching", "up", "--detach"]
+    ),
+    "run-profile": lambda x: subprocess.run(
+        ["docker-compose", "--profile", x[0], "up", "--detach"]
+    ),
+    "run": lambda x: subprocess.run(
+        ["docker-compose", "up"] + list(map(lambda t: t.lower(), x)) + ["--detach"]
+    ),
     "update": lambda x: updateConfig(),
     "list": lambda x: subprocess.run(["docker-compose", "ps"]),
     "channels": lambda x: print(readChannels()),
-    "stop": lambda x: subprocess.run(["docker-compose", "stop"]+list(map(lambda t: t.lower(), x))),
-    "kill": lambda x: subprocess.run(["docker-compose", "kill"]+list(map(lambda t: t.lower(), x))),
+    "stop": lambda x: subprocess.run(
+        ["docker-compose", "stop"] + list(map(lambda t: t.lower(), x))
+    ),
+    "kill": lambda x: subprocess.run(
+        ["docker-compose", "kill"] + list(map(lambda t: t.lower(), x))
+    ),
     "add": lambda x: addNewChannel(x),
     "conf": lambda x: getConfAbout(x[0]),
     "exit": lambda x: sys.exit(0),
@@ -414,7 +437,7 @@ def commandsPipeline(sleepTime=5):
         time.sleep(sleepTime)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     dockerClient = docker.from_env()
     # container = dockerClient.containers.get('34f1571bb1')

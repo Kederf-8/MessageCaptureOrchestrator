@@ -4,8 +4,8 @@ import time
 
 HOST, PORT = "logstash", 10155
 
-#m ='{"id": 2, "name": "abc"}'
-m = {"id": 2, "name": "abc"} 
+# m ='{"id": 2, "name": "abc"}'
+m = {"id": 2, "name": "abc"}
 
 
 data = json.dumps(m)
@@ -19,7 +19,7 @@ while True:
         print("Looking for at least a connection...")
         sock.connect((HOST, PORT))
         print("Doppio Abbombazza")
-        sock.sendall(bytes(data,encoding="utf-8"))
+        sock.sendall(bytes(data, encoding="utf-8"))
         print("[client] SENT")
 
         # Receive data from the server and shut down
