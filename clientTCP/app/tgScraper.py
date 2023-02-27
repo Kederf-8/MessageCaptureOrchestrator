@@ -1,13 +1,14 @@
-import requests
-import socket
-import time
+import json
 import os
 import random as rand
-from bs4 import BeautifulSoup as soup, Tag
-import json
+import socket
+import time
+
+import requests
+from bs4 import BeautifulSoup as soup
+from bs4 import Tag
 from tgFetch import tgFetch
 from util_funcs import *
-
 
 DATA_PATH = "../data/"
 PATH_TO_DATA = f"{DATA_PATH}information.json"

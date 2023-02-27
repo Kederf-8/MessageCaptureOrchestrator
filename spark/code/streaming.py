@@ -1,16 +1,15 @@
-from distutils.command.config import config
-from pyspark.sql import types as st
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import explode, from_json, col, udf
 from elasticsearch import Elasticsearch
-from pyspark.conf import SparkConf
+from geocoding import findCitiesInText, getLocationAsString
 from pyspark import SparkContext
+from pyspark.conf import SparkConf
+from pyspark.sql import SparkSession
+from pyspark.sql import types as st
+from pyspark.sql.functions import col, explode, from_json, udf
+from sentimentAnalysis import cleanText, getModel, saveModel
 
 # our modules
-from urlScraper import findAllUrls, ensureProtocol, loadAndParse
+from urlScraper import ensureProtocol, findAllUrls, loadAndParse
 from whoIsManager import whoIsManager
-from sentimentAnalysis import getModel, saveModel, cleanText
-from geocoding import findCitiesInText, getLocationAsString
 
 whoIs = whoIsManager()
 

@@ -1,6 +1,7 @@
 import random as rand
-from bisect import bisect
 import warnings
+from bisect import bisect
+
 import translators as ts
 
 

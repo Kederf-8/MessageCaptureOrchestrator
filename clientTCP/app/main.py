@@ -1,10 +1,9 @@
 import os
 import sys
-from time import sleep
+
 from tgScraper import *
 from translator import translator
 from util_funcs import *
-
 
 if __name__ == "__main__":
 

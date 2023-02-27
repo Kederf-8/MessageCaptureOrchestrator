@@ -1,7 +1,8 @@
 import json
-import requests
-import pandas as pd
 import re
+
+import pandas
+import requests
 
 
 def fetchDataset():
@@ -13,7 +14,7 @@ def fetchDataset():
         "X-Parse-Master-Key": "iyzSAHUmPKUzceWRIIitUD1OKAGHvVUzEYb5DCpj",
     }
     dict = json.loads(requests.get(url, headers=headers).content.decode("utf-8"))
-    df = pd.DataFrame(dict["results"])
+    df = pandas.DataFrame(dict["results"])
     # df = pd.from_dict(dict)
     print(f"COUNT: {df.count()}")
     print(f"COLUMNS: {df.columns}")
@@ -23,7 +24,7 @@ def fetchDataset():
 
 def modifyDataset():
     pattern = r"[0-9.]+"
-    df = pd.read_csv("ukraine_cities.csv", engine="python")
+    df = pandas.read_csv("ukraine_cities.csv", engine="python")
     df["name"] = df["name"].apply(lambda x: x.lower())
     df["latitude"] = df["location"].apply(lambda x: re.findall(pattern, x)[0])
     df["longitude"] = df["location"].apply(lambda x: re.findall(pattern, x)[1])
@@ -35,7 +36,7 @@ def LoadUkraineCities():
     datasets = ["ukraine_cities_cleaned.csv"]  # ,'ukraine_cities.csv'
     for dataset in datasets:
         try:
-            return pd.read_csv(dataset, engine="python")
+            return pandas.read_csv(dataset, engine="python")
         except:
             print(f"Dataset {dataset} non è stato trovato")
     print("Nessun dataset trovato")

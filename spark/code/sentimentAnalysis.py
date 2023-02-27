@@ -1,16 +1,20 @@
-from pyspark.conf import SparkConf
-from pyspark import SparkContext
-from pyspark.sql.session import SparkSession
-import pyspark.sql.types as tp
-from pyspark.ml import Pipeline
-from pyspark.ml.feature import StopWordsRemover, Word2Vec, RegexTokenizer
-from pyspark.ml.classification import LogisticRegression
-from pyspark.sql import SparkSession
-from pyspark.ml import PipelineModel
-import pandas as pd
-from bs4 import BeautifulSoup
 import re
 
+import pandas as pd
+import pyspark.sql.types as tp
+from bs4 import BeautifulSoup
+from pyspark import SparkContext
+from pyspark.conf import SparkConf
+from pyspark.ml import (
+    LogisticRegression,
+    Pipeline,
+    PipelineModel,
+    RegexTokenizer,
+    StopWordsRemover,
+    Word2Vec,
+)
+from pyspark.sql import SparkSession
+from pyspark.sql.session import SparkSession
 
 schema = tp.StructType(
     [

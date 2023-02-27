@@ -1,9 +1,8 @@
-import requests
-import time
-from bs4 import BeautifulSoup
-from bs4.element import Comment
 import re
+import time
 
+import requests
+from bs4 import BeautifulSoup, Comment
 
 esempioInput = """add1 http://mit.edu.com abc
 add2 https://unict.com . abc

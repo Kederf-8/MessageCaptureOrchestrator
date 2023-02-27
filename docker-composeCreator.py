@@ -1,10 +1,11 @@
 import configparser
-import docker
+import json
 import subprocess
 import sys
-import json
 import threading
 import time
+
+import docker
 
 IMAGE_CLIENT_TCP = "client-tcp"
 IMAGE_LOGSTASH = "logstash-for-ukraine"
@@ -38,8 +39,6 @@ def createScriptContainer(config, channel_name, port):
                     context: clientTCP
                     dockerfile: Dockerfile  
                 image: {IMAGE_CLIENT_TCP}
-                # ports:
-                #     - "{port}:{port}"
                 networks:
                     - warplatforms-network
                 volumes:
@@ -54,9 +53,6 @@ def createScriptContainer(config, channel_name, port):
 
 
 def createContainers(config):
-    # for chname in config.sections():
-    #     for item in config[chname].items():
-    #         print(item)
     containers = ""
     i = 0
     for chname in config.sections():
@@ -174,32 +170,6 @@ def createDockerCompose(config):
                 mem_limit: 1g
                 profiles: ["visualization", "all"] 
                 
-            # prova_es8: 
-            #     image: elasticsearch:8.2.2 
-            #     ports: 
-            #         - '9200:9200'
-            #     environment: 
-            #         - discovery.type=single-node
-            #         - xpack.security.enabled=false
-            #         - "ES_JAVA_OPTS=-Xms2g -Xmx2g" 
-            #     mem_limit: 4g
-            #     ulimits: 
-            #         memlock: 
-            #             soft: -1 
-            #             hard: -1 
-            #     networks: 
-            #         - warplatforms-network
-            #     profiles: ["storage"] 
-             
-            # prova_kibana8: 
-            #     image: kibana:8.2.2 
-            #     ports: 
-            #         - '5601:5601' 
-            #     networks: 
-            #         - warplatforms-network
-            #     mem_limit: 1g
-            #     profiles: ["visualization"] 
-                
             spark:
                 build: 
                     context: spark
@@ -244,11 +214,6 @@ def getConfAbout(chname):
     print(f"Non è stata trovata alcuna configurazione corrispondente a {chname} ")
 
 
-# TODO
-# change channel conf method
-# restart channel
-
-
 def readChannels():
     global config
     return config.sections()
@@ -267,7 +232,6 @@ def insertOptions():
 def addNewChannel(params):
     print("Configurazione di un nuovo canale")
     global config
-    # print(config.sections())
     if params == []:
         chname = input("Nome del canale: ")
     else:
@@ -322,12 +286,10 @@ def updateLastIds():
                 )
                 # transaction_id permette di capire se il dato è stato modificato o no rispetto all'ultimo aggiornamento
                 if config[section]["transaction_id"] != str(obj["transaction_id"]):
-                    # print(f"[{section}]--> {config[section]['last_id']} to {obj['last_id']}")
                     config[section]["last_id"] = str(obj["last_id"])
                     config[section]["transaction_id"] = str(obj["transaction_id"])
                     modified = True
             except Exception as e:
-                # print(f"(updateLastIds[{section}]): {e}")
                 continue
     if modified:
         # aggiorna il config.ini
@@ -432,7 +394,6 @@ def execCommand(command):
 
 def commandsPipeline(sleepTime=5):
     while True:
-        # updateConfig()
         updateLastIds()
         time.sleep(sleepTime)
 
@@ -440,7 +401,6 @@ def commandsPipeline(sleepTime=5):
 if __name__ == "__main__":
 
     dockerClient = docker.from_env()
-    # container = dockerClient.containers.get('34f1571bb1')
 
     config = configparser.ConfigParser()
     config.read("config.ini")

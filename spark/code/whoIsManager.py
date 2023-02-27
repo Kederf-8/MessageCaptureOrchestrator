@@ -1,7 +1,8 @@
-from datetime import datetime
-import time
-import whois
 import json
+import time
+from datetime import datetime
+
+import whois
 
 
 def extractElem(var, pos="Last", shouldBe=""):

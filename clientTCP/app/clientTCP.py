@@ -1,5 +1,5 @@
-import socket
 import json
+import socket
 import time
 
 HOST, PORT = "logstash", 10155

@@ -1,6 +1,3 @@
-from translator import translator
-
-
 class tgFetch:
 
     # URL               URL del canale telegram
