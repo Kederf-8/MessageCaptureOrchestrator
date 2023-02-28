@@ -34,21 +34,21 @@ def conf2EnvFormat(config, section, prefix="", backslash=0):
 def createScriptContainer(config, channel_name, port):
     service_name = channel_name.lower()
     container = f"""
-            {service_name}:
-                build:
-                    context: clientTCP
-                    dockerfile: Dockerfile
-                image: {IMAGE_CLIENT_TCP}
-                networks:
-                    - warplatforms-network
-                volumes:
-                    - $PWD/clientTCP/app/:/app/
-                    - $PWD/clientTCP/data/{service_name}/:/data
-                environment:
+    {service_name}:
+        build:
+            context: clientTCP
+            dockerfile: Dockerfile
+        image: {IMAGE_CLIENT_TCP}
+        networks:
+            - warplatforms-network
+        volumes:
+            - $PWD/clientTCP/app/:/app/
+            - $PWD/clientTCP/data/{service_name}/:/data
+        environment:
 {conf2EnvFormat(config,channel_name,prefix="ENV_",backslash=5)}
-                command: python -u main.py {channel_name}
-                profiles: ["fetching", "all"]
-                """
+        command: python -u main.py {channel_name}
+        profiles: ["fetching", "all"]
+        """
     return container
 
 
