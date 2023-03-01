@@ -26,8 +26,7 @@ def conf2EnvFormat(config, section, prefix="", backslash=0):
     str = ""
     for item in config[section].items():
         option, param = item
-        str += f"{backslash_str}- {prefix}{option.upper()}={param}\n"
-        # print(f"1){item}")
+        str += f"{backslash_str}-{prefix}{option.upper()}={param}\n"
     return str
 
 
@@ -45,7 +44,7 @@ def createScriptContainer(config, channel_name, port):
             - $PWD/clientTCP/app/:/app/
             - $PWD/clientTCP/data/{service_name}/:/data
         environment:
-{conf2EnvFormat(config,channel_name,prefix="ENV_",backslash=5)}
+{conf2EnvFormat(config,channel_name,prefix="ENV_",backslash=3)}
         command: python -u main.py {channel_name}
         profiles: ["fetching", "all"]
         """
@@ -101,8 +100,10 @@ services:
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafkaserver:29092
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:
+                PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+            KAFKA_ADVERTISED_LISTENERS:
+                PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafkaserver:29092
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
             KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
             KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
