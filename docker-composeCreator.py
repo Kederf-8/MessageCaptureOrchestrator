@@ -26,7 +26,7 @@ def conf2EnvFormat(config, section, prefix="", backslash=0):
     str = ""
     for item in config[section].items():
         option, param = item
-        str += f"{backslash_str}-{prefix}{option.upper()}={param}\n"
+        str += f"{backslash_str}- {prefix}{option.upper()}={param}\n"
     return str
 
 

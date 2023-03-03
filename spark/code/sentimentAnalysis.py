@@ -5,15 +5,11 @@ import pyspark.sql.types as tp
 from bs4 import BeautifulSoup
 from pyspark import SparkContext
 from pyspark.conf import SparkConf
-from pyspark.ml import (
-    LogisticRegression,
-    Pipeline,
-    PipelineModel,
-    RegexTokenizer,
-    StopWordsRemover,
-    Word2Vec,
-)
+from pyspark.ml import Pipeline, PipelineModel
+from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.feature import RegexTokenizer, StopWordsRemover, Word2Vec
 from pyspark.sql import SparkSession
+from pyspark.sql.session import SparkSession
 
 schema = tp.StructType(
     [
