@@ -393,8 +393,7 @@ def execCommand(command):
     if params == []:
         return
     if params[0].lower() in commands:
-        answer = commands[params[0].lower()](params[1:])
-        print(answer)
+        commands[params[0].lower()](params[1:])
     else:
         print(f"\tIl comando {command} non è previsto")
     return

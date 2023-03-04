@@ -8,4 +8,4 @@ multi_line_output = 3
 
 [tool.ruff]
 line-length = 88
-per-file-ignores = {"settings/production.py" = ["F401", "F405"]}
+per-file-ignores = {"docker-composeCreator.py" = ["E501"]}
