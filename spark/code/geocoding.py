@@ -1,44 +1,46 @@
 import json
-import urllib
-import requests
-import pandas as pd
 import re
+
+import pandas
+import requests
 
 
 def fetchDataset():
-    url = 'https://parseapi.back4app.com/classes/City?limit=1512&keys=name,population,location,cityId'
+    url = (
+        "https://parseapi.back4app.com/classes/City?limit=1512&keys=name,"
+        + +"population,location,cityId"
+    )
     headers = {
         # This is the fake app's application id
-        'X-Parse-Application-Id': 'WHhatLdoYsIJrRzvkD0Y93uKHTX49V9gmHgp8Rw3',
+        "X-Parse-Application-Id": "WHhatLdoYsIJrRzvkD0Y93uKHTX49V9gmHgp8Rw3",
         # This is the fake app's readonly master key
-        'X-Parse-Master-Key': 'iyzSAHUmPKUzceWRIIitUD1OKAGHvVUzEYb5DCpj'
+        "X-Parse-Master-Key": "iyzSAHUmPKUzceWRIIitUD1OKAGHvVUzEYb5DCpj",
     }
-    dict = json.loads(requests.get(
-        url, headers=headers).content.decode('utf-8'))
-    df = pd.DataFrame(dict["results"])
+    dict = json.loads(requests.get(url, headers=headers).content.decode("utf-8"))
+    df = pandas.DataFrame(dict["results"])
     # df = pd.from_dict(dict)
     print(f"COUNT: {df.count()}")
     print(f"COLUMNS: {df.columns}")
     print(df.head())
-    df.to_csv('ukraine_cities.csv', encoding='utf-8')
+    df.to_csv("ukraine_cities.csv", encoding="utf-8")
 
 
 def modifyDataset():
-    pattern = r'[0-9.]+'
-    df = pd.read_csv('ukraine_cities.csv', engine='python')
-    df['name'] = df['name'].apply(lambda x: x.lower())
-    df['latitude'] = df['location'].apply(lambda x: re.findall(pattern, x)[0])
-    df['longitude'] = df['location'].apply(lambda x: re.findall(pattern, x)[1])
+    pattern = r"[0-9.]+"
+    df = pandas.read_csv("ukraine_cities.csv", engine="python")
+    df["name"] = df["name"].apply(lambda x: x.lower())
+    df["latitude"] = df["location"].apply(lambda x: re.findall(pattern, x)[0])
+    df["longitude"] = df["location"].apply(lambda x: re.findall(pattern, x)[1])
     new_df = df[["name", "population", "latitude", "longitude"]]
-    new_df.to_csv('ukraine_cities_cleaned.csv', encoding='utf-8')
+    new_df.to_csv("ukraine_cities_cleaned.csv", encoding="utf-8")
 
 
 def LoadUkraineCities():
-    datasets = ['ukraine_cities_cleaned.csv']  # ,'ukraine_cities.csv'
+    datasets = ["ukraine_cities_cleaned.csv"]  # ,'ukraine_cities.csv'
     for dataset in datasets:
         try:
-            return pd.read_csv(dataset, engine='python')
-        except:
+            return pandas.read_csv(dataset, engine="python")
+        except Exception:
             print(f"Dataset {dataset} non è stato trovato")
     print("Nessun dataset trovato")
     return False
@@ -57,21 +59,25 @@ def getLocation(cityname):
     if city_df.empty:
         return False
     location = {}
-    location['latitude'] = city_df.iloc[0]['latitude']
-    location['longitude'] = city_df.iloc[0]['longitude']
+    location["latitude"] = city_df.iloc[0]["latitude"]
+    location["longitude"] = city_df.iloc[0]["longitude"]
     return location
+
 
 # tipo "41.12,-71.34"
 
 
 def getLocationAsString(cityname):
     location = getLocation(cityname)
-    if location == False:
+    if location is False:
         return None
-    return f"POINT({location['longitude']} {location['latitude']})"      
+    return f"POINT({location['longitude']} {location['latitude']})"
+
+
 # [float('%.5f' % location['latitude']), float('%.5f' % location['longitude'])]
 
 # POINT(lon lat)
+
 
 def getLocationsAsString(list):
     # for city in list:
@@ -86,12 +92,14 @@ def getLocationsAsString(list):
 
 def findCitiesInText(text, minlen=4, maxlen=10):
     cities = []
-    tokens = [word for word in text.split() if len(word) >= minlen and len(word) <= maxlen]
+    tokens = [
+        word for word in text.split() if len(word) >= minlen and len(word) <= maxlen
+    ]
     print(tokens)
     for token in tokens:
         result = findCity(token)
         if not result.empty:
-            cities.append(result.iloc[0]['name'])
+            cities.append(result.iloc[0]["name"])
     return cities
 
 
@@ -103,7 +111,7 @@ def test():
     print(getLocationsAsString(result))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fetchDataset()
     modifyDataset()
     test()

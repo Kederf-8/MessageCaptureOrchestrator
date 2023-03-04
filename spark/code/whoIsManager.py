@@ -1,8 +1,8 @@
-from datetime import datetime
-import time
-import whois
-from pyspark.sql.functions import udf, lit
 import json
+import time
+from datetime import datetime
+
+import whois
 
 
 def extractElem(var, pos="Last", shouldBe=""):
@@ -15,27 +15,48 @@ def extractElem(var, pos="Last", shouldBe=""):
 
     if isinstance(var, list):
         if pos == "Last":
-            index = len(var)-1
+            index = len(var) - 1
         else:
             index = pos
         return var[index]
     return var
 
 
-url_prove = ["https://www.aranzulla.it", "https://www.kmu.gov.ua/en", "https://it.wikipedia.org/wiki/Dragon_Ball_Z", "https://it.wikipedia.org/wiki/Che_Guevara", "https://it.wikipedia.org/wiki/Coordinate_geografiche",
-             "https://it.wikipedia.org/wiki/Vladimir_Putin", "https://stackoverflow.com/questions/32331848/create-a-custom-transformer-in-pyspark-ml", "https://sparkbyexamples.com/pyspark/pyspark-cast-column-type", "https://it.quora.com/partners"]
+url_prove = [
+    "https://www.aranzulla.it",
+    "https://www.kmu.gov.ua/en",
+    "https://it.wikipedia.org/wiki/Dragon_Ball_Z",
+    "https://it.wikipedia.org/wiki/Che_Guevara",
+    "https://it.wikipedia.org/wiki/Coordinate_geografiche",
+    "https://it.wikipedia.org/wiki/Vladimir_Putin",
+    "https://stackoverflow.com/questions/32331848/create-a-custom-transformer-in-pyspark-ml",
+    "https://sparkbyexamples.com/pyspark/pyspark-cast-column-type",
+    "https://it.quora.com/partners",
+]
 
 
 class whoIsManager:
 
-    relevant_fields = ["domain_name", "whois_server", "registrar", "org", "referral_url",
-                       "state", "city", "country", "creation_date", "updated_date", "expiration_date"]
+    relevant_fields = [
+        "domain_name",
+        "whois_server",
+        "registrar",
+        "org",
+        "referral_url",
+        "state",
+        "city",
+        "country",
+        "creation_date",
+        "updated_date",
+        "expiration_date",
+    ]
 
     def __init__(self):
         self.cache = {}
 
         self.domain_name = lambda x: extractElem(
-            self.lookFor(x, "domain_name"), pos="Last")
+            self.lookFor(x, "domain_name"), pos="Last"
+        )
         self.whois_server = lambda x: self.lookFor(x, "whois_server")
         self.registrar = lambda x: self.lookFor(x, "registrar")
         self.org = lambda x: self.lookFor(x, "org")
@@ -48,11 +69,14 @@ class whoIsManager:
         self.address = lambda x: extractElem(self.lookFor(x, "address"))
 
         self.creation_date = lambda x: extractElem(
-            self.lookFor(x, "creation_date"), shouldBe="datetime")
+            self.lookFor(x, "creation_date"), shouldBe="datetime"
+        )
         self.updated_date = lambda x: extractElem(
-            self.lookFor(x, "updated_date"), shouldBe="datetime")
+            self.lookFor(x, "updated_date"), shouldBe="datetime"
+        )
         self.expiration_date = lambda x: extractElem(
-            self.lookFor(x, "expiration_date"), shouldBe="datetime")
+            self.lookFor(x, "expiration_date"), shouldBe="datetime"
+        )
 
     def request(self, URL):
         try:
@@ -84,7 +108,7 @@ class whoIsManager:
         for field in whoIsManager.relevant_fields:
             try:
                 dict[field] = str(getattr(self, field)(URL))
-            except:
+            except Exception:
                 dict[field] = "aa"
         return json.dumps(dict, indent=4)
 
@@ -98,11 +122,12 @@ def main():
         # print(type(whoIs.udf_domain_name(url)))
         # print(whoIs.udf_creation_date(url))
         # print(type(whoIs.udf_creation_date(url)))
-        print("-"*30)
-
+        print("-" * 30)
 
     # print(whoIs.lookFor("https://github.com","domain_name"))
     # print(whoIs.lookFor("https://wikipedia.com","domain_name"))
     # print(whoIs.lookFor("https://lynn-kwong.medium.com/","domain_name"))
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     main()

@@ -1,0 +1,8 @@
+requests
+bs4
+translators
+docker
+whois
+pandas
+pyspark
+pre-commit
