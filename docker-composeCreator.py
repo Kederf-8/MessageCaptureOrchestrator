@@ -39,7 +39,7 @@ def createScriptContainer(config, channel_name, port):
             dockerfile: Dockerfile
         image: {IMAGE_CLIENT_TCP}
         networks:
-            - warplatforms-network
+            - mco-network
         volumes:
             - $PWD/clientTCP/app/:/app/
             - $PWD/clientTCP/data/{service_name}/:/data
@@ -78,7 +78,7 @@ services:
         ports:
             - "10155:10155"
         networks:
-            - warplatforms-network
+            - mco-network
         profiles: ["ingestion", "all"]
 
     zookeeper:
@@ -88,7 +88,7 @@ services:
             ZOOKEEPER_CLIENT_PORT: 2181
             ZOOKEEPER_TICK_TIME: 2000
         networks:
-            - warplatforms-network
+            - mco-network
 
     kafkaserver:
         image: {IMAGE_KAFKA}
@@ -108,7 +108,7 @@ services:
             KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
             KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         networks:
-            - warplatforms-network
+            - mco-network
 
     kafka-ui:
         image: {IMAGE_KAFKAUI}
@@ -124,7 +124,7 @@ services:
             KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafkaserver:29092
             KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
         networks:
-            - warplatforms-network
+            - mco-network
 
     kafka-init:
         image: {IMAGE_KAFKAINIT}
@@ -143,7 +143,7 @@ services:
             kafka-topics --bootstrap-server kafkaserver:29092 --list
             "
         networks:
-            - warplatforms-network
+            - mco-network
 
     elasticsearch:
         image: {IMAGE_ELASTICSEARCH}
@@ -158,7 +158,7 @@ services:
                 soft: -1
                 hard: -1
         networks:
-            - warplatforms-network
+            - mco-network
         profiles: ["storage", "all"]
 
     kibana:
@@ -166,7 +166,7 @@ services:
         ports:
             - '5601:5601'
         networks:
-            - warplatforms-network
+            - mco-network
         mem_limit: 1g
         profiles: ["visualization", "all"]
 
@@ -174,7 +174,7 @@ services:
         build:
             context: spark
         networks:
-            - warplatforms-network
+            - mco-network
         depends_on:
             - elasticsearch
             - kibana
@@ -183,8 +183,8 @@ services:
         profiles: ["computation", "all"]
 
 networks:
-    warplatforms-network:
-        name: warplatforms-network
+    mco-network:
+        name: mco-network
         driver: bridge"""
     return script
 

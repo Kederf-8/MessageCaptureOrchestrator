@@ -1,7 +1,7 @@
 FROM jupyter/pyspark-notebook:spark-3.1.1
 
 RUN pip3 install pyspark numpy 
-RUN pip3 install elasticsearch
+RUN pip3 install elasticsearch==7.12.1
 RUN pip3 install python-whois
 
 WORKDIR /app
