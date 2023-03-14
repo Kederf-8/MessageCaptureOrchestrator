@@ -6,3 +6,4 @@ whois
 pandas
 pyspark
 pre-commit
+elasticsearch==7.12.1
