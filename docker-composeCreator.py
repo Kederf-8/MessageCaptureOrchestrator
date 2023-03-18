@@ -39,7 +39,7 @@ def createScriptContainer(config, channel_name, port):
             dockerfile: Dockerfile
         image: {IMAGE_CLIENT_TCP}
         networks:
-            - mco-network
+            - ELK-network
         volumes:
             - $PWD/clientTCP/app/:/app/
             - $PWD/clientTCP/data/{service_name}/:/data
@@ -67,18 +67,18 @@ services:
 {createContainers(config)}
     logstash:
         build:
-            context: LogstashDocker
+            context: Logstash
             dockerfile: Dockerfile
         image: {IMAGE_LOGSTASH}
         volumes:
-            - $PWD/LogstashDocker/pipeline/:/usr/share/logstash/pipeline/
+            - $PWD/Logstash/pipeline/:/usr/share/logstash/pipeline/
         environment:
             # limite RAM di 1gb.
             - "LS_JAVA_OPTS=-Xms1g -Xmx1g"
         ports:
             - "10155:10155"
         networks:
-            - mco-network
+            - ELK-network
         profiles: ["ingestion", "all"]
 
     zookeeper:
@@ -88,7 +88,7 @@ services:
             ZOOKEEPER_CLIENT_PORT: 2181
             ZOOKEEPER_TICK_TIME: 2000
         networks:
-            - mco-network
+            - ELK-network
 
     kafkaserver:
         image: {IMAGE_KAFKA}
@@ -108,7 +108,7 @@ services:
             KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
             KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         networks:
-            - mco-network
+            - ELK-network
 
     kafka-ui:
         image: {IMAGE_KAFKAUI}
@@ -124,7 +124,7 @@ services:
             KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafkaserver:29092
             KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
         networks:
-            - mco-network
+            - ELK-network
 
     kafka-init:
         image: {IMAGE_KAFKAINIT}
@@ -143,10 +143,12 @@ services:
             kafka-topics --bootstrap-server kafkaserver:29092 --list
             "
         networks:
-            - mco-network
+            - ELK-network
 
     elasticsearch:
         image: {IMAGE_ELASTICSEARCH}
+        volumes:
+            - elasticsearch:/usr/share/elasticsearch/data:Z
         ports:
             - '9200:9200'
         environment:
@@ -158,7 +160,7 @@ services:
                 soft: -1
                 hard: -1
         networks:
-            - mco-network
+            - ELK-network
         profiles: ["storage", "all"]
 
     kibana:
@@ -166,7 +168,7 @@ services:
         ports:
             - '5601:5601'
         networks:
-            - mco-network
+            - ELK-network
         mem_limit: 1g
         profiles: ["visualization", "all"]
 
@@ -174,7 +176,7 @@ services:
         build:
             context: spark
         networks:
-            - mco-network
+            - ELK-network
         depends_on:
             - elasticsearch
             - kibana
@@ -183,9 +185,12 @@ services:
         profiles: ["computation", "all"]
 
 networks:
-    mco-network:
-        name: mco-network
-        driver: bridge"""
+    ELK-network:
+        name: ELK-network
+        driver: bridge
+
+volumes:
+    elasticsearch:"""
     return script
 
 
