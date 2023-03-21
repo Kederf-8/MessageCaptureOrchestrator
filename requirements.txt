@@ -2,8 +2,9 @@ requests
 bs4
 translators
 docker
-whois
+python-whois==0.8.0
 pandas
 pyspark
 pre-commit
 elasticsearch==7.12.1
+kafka-python
