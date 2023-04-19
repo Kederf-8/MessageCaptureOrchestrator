@@ -1,18 +1,25 @@
 from elasticsearch import Elasticsearch
+
+# our modules
 from geocoding import findCitiesInText, getLocationAsString
+from sentimentAnalysis import cleanText, getModel, saveModel
+from urlScraper import ensureProtocol, findAllUrls, loadAndParse
+from whoIsManager import whoIsManager
+
 from pyspark import SparkContext
 from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql import types as st
 from pyspark.sql.functions import col, explode, from_json, udf
-from sentimentAnalysis import cleanText, getModel, saveModel
 
-# our modules
-from urlScraper import ensureProtocol, findAllUrls, loadAndParse
-from whoIsManager import whoIsManager
+TOPIC = "telegram-messages"
+KAFKASERVER = "kafkaserver:29092"
+# KAFKASERVER = "localhost:9092"
+
+es_first_index = "webpages_content"
+es_second_index = "ukraine_cities"
 
 whoIs = whoIsManager()
-
 extractUrls = udf(
     lambda x: ensureProtocol(findAllUrls(x)), st.ArrayType(elementType=st.StringType())
 )
@@ -98,6 +105,8 @@ def getReader(mode=""):
             .option("startingOffsets", "latest")
             .load()
         )
+
+    # Read data from Kafka
     return (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", KAFKASERVER)
@@ -119,16 +128,14 @@ def outputStream(stream, mode="", index=""):
             if response["acknowledged"] is True:
                 print("Successfully created index:", response["index"])
 
-        return (
+        write = (
             stream.writeStream.option("checkpointLocation", "/tmp/")
             .format("es")
             .start(index)
         )
 
+        return write
 
-TOPIC = "telegram-messages"
-KAFKASERVER = "kafkaserver:29092"
-# KAFKASERVER = "localhost:9092"
 
 # Pipeline emotion_detection
 pipelineFit = getModel(task="emotion_detection", inputCol="content", labelCol="label")
@@ -141,7 +148,7 @@ df = (
     .selectExpr("data.*")
 )
 
-df.printSchema()
+# df.printSchema()
 
 # Split the list into sentences
 sentences = df.select(
@@ -151,7 +158,7 @@ sentences = df.select(
     col("data"),
     explode(df.text).alias("sentence"),
 )
-sentences.printSchema()
+# sentences.printSchema()
 
 message_analysis = (
     df.select(
@@ -173,10 +180,14 @@ urls = sentences.select(
     explode(extractUrls(col("sentence"))).alias("url"),
 )
 
+# urls.printSchema()
+
 # add text from html webpage and whois info
 df = urls.withColumn("content", udf_cleanText(getTextFromHtml(urls.url))).withColumn(
     "whois", udf_whois(urls.url)
 )
+
+# df.printSchema()
 
 # Sentiment Analysis: emotion_detection
 out_df = (
@@ -202,12 +213,16 @@ message_analysis = (
 )  # esclusivamente città ucraine
 
 # col('prediction')
-out_df.printSchema()
+# out_df.printSchema()
+# out_df.explain()
 
-out_stream = outputStream(out_df, index="spark-to-es")
+# message_analysis.printSchema()
+# message_analysis.explain()
 
-out_stream2 = outputStream(message_analysis, index="message-analysis")
-
+out_stream = outputStream(out_df, index=es_first_index)
+out_stream2 = outputStream(message_analysis, index=es_second_index)
 
 out_stream.awaitTermination()
 out_stream2.awaitTermination()
+
+spark.stop()

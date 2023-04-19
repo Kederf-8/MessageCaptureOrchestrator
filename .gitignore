@@ -3,3 +3,4 @@ clientTCP/data/
 config.ini
 docker-compose.yml
 mco_env
+spark/code/__pycache__/

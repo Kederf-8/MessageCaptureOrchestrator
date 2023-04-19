@@ -158,6 +158,10 @@ combined_pat = r"|".join((pat1, pat2))
 
 
 def cleanText(text):
+    
+    if not text:
+        return
+    
     soup = BeautifulSoup(text, "html.parser")
     souped = soup.get_text()
     stripped = re.sub(combined_pat, "", souped)
