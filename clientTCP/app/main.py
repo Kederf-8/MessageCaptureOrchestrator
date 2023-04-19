@@ -6,7 +6,6 @@ from translator import translator
 from util_funcs import strOrNone, toBool
 
 if __name__ == "__main__":
-
     # Il canale viene passato come parametro all'esecuzione di main.py
     channel = "https://t.me/" + sys.argv[1]
 

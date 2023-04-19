@@ -1,5 +1,4 @@
 class tgFetch:
-
     # URL               URL del canale telegram
     # chname            Nome del canale telegram
     # HOST              Host a cui inviare i dati dei messaggi

@@ -91,10 +91,9 @@ def getLocationsAsString(list):
 
 
 def findCitiesInText(text, minlen=4, maxlen=10):
-    
     if not text:
         return
-    
+
     cities = []
     tokens = [
         word for word in text.split() if len(word) >= minlen and len(word) <= maxlen

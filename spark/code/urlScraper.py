@@ -23,6 +23,7 @@ regexURL = (
     + "|655[0-2][0-9]|6553[0-5])?(?:/[\w\.-]*)*/?)\b"
 )
 
+
 # ritorna l'array degli URL
 def findAllUrls(text):
     matches = re.findall(regexURL, text)

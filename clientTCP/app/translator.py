@@ -6,7 +6,6 @@ import translators as ts
 
 
 class translator:
-
     lang_map = [
         "auto",
         "en",

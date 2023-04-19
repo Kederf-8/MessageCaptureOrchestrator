@@ -33,7 +33,6 @@ def get_spark_session():
 
 
 def getPipeline(inputCol="input", labelCol="label"):
-
     # tokenizer = Tokenizer(inputCol=inputCol, outputCol="words")
     # hashtf = HashingTF(numFeatures=2**16, inputCol="words", outputCol='tf')
     # idf = IDF(inputCol='tf', outputCol="features", minDocFreq=5)
@@ -158,10 +157,9 @@ combined_pat = r"|".join((pat1, pat2))
 
 
 def cleanText(text):
-    
     if not text:
         return
-    
+
     soup = BeautifulSoup(text, "html.parser")
     souped = soup.get_text()
     stripped = re.sub(combined_pat, "", souped)

@@ -36,7 +36,6 @@ url_prove = [
 
 
 class whoIsManager:
-
     relevant_fields = [
         "domain_name",
         "whois_server",

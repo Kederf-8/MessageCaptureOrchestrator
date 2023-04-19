@@ -412,7 +412,6 @@ def commandsPipeline(sleepTime=5):
 
 
 if __name__ == "__main__":
-
     dockerClient = docker.from_env()
 
     config = configparser.ConfigParser()
