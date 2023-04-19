@@ -95,6 +95,7 @@ services:
         # container_name: kafkaserver
         ports:
             - "9092:9092"
+            - "29092:9092"
         depends_on:
             - zookeeper
         environment:
