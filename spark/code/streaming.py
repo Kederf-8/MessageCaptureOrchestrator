@@ -1,10 +1,10 @@
 from elasticsearch import Elasticsearch
 
 # our modules
-from geocoding import findCitiesInText, getLocationAsString
+from geocoding import find_cities_in_text, get_location_as_string
 from sentimentAnalysis import cleanText, getModel, saveModel
-from urlScraper import ensureProtocol, findAllUrls, loadAndParse
-from whoIsManager import whoIsManager
+from urlScraper import ensure_protocol, find_all_urls, load_and_parse
+from whoIsManager import WhoIsManager
 
 from pyspark import SparkContext
 from pyspark.conf import SparkConf
@@ -19,16 +19,16 @@ KAFKASERVER = "kafkaserver:29092"
 es_first_index = "webpages_content"
 es_second_index = "ukraine_cities"
 
-whoIs = whoIsManager()
+whoIs = WhoIsManager()
 extractUrls = udf(
-    lambda x: ensureProtocol(findAllUrls(x)), st.ArrayType(elementType=st.StringType())
+    lambda x: ensure_protocol(find_all_urls(x)), st.ArrayType(elementType=st.StringType())
 )
-getTextFromHtml = udf(loadAndParse)
+getTextFromHtml = udf(load_and_parse)
 udf_cleanText = udf(cleanText)
-udf_whois = udf(whoIs.getRelevantFields)
+udf_whois = udf(whoIs.get_relevant_fields)
 equivalent_emotion = udf(lambda x: "positive" if x == 1.0 else "negative")
-ukrainian_cities = udf(findCitiesInText, st.ArrayType(st.StringType()))
-city_location = udf(getLocationAsString)
+ukrainian_cities = udf(find_cities_in_text, st.ArrayType(st.StringType()))
+city_location = udf(get_location_as_string)
 
 
 def get_spark_session():

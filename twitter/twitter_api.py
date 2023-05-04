@@ -1,33 +1,30 @@
 import tweepy
 import configparser
-import pandas as pd
 
 # read configs
-config = configparser.ConfigParser()
-config.read("config.ini")
-section = "twitter"
+config = configparser.ConfigParser(
+    allow_no_value=True, interpolation=configparser.ExtendedInterpolation()
+)
+config.read("twitter/config.ini")
+section = "twitter2"
 
 api_key = config[section]["api_key"]
 api_key_secret = config[section]["api_key_secret"]
+bearer_token = config[section]["bearer_token"]
 
 access_token = config[section]["access_token"]
 access_token_secret = config[section]["access_token_secret"]
 
-# authentication
-auth = tweepy.OAuthHandler(api_key, api_key_secret)
-auth.set_access_token(access_token, access_token_secret)
+# Authenticate with the Twitter API using Tweepy
+auth = tweepy.AppAuthHandler(api_key, api_key_secret)
+api = tweepy.API(auth, wait_on_rate_limit=True)
 
-api = tweepy.API(auth)
+# Set the search query you want to use
+query = "#examplehashtag OR keyword"
 
-public_tweets = api.home_timeline()
+# Use the Tweepy Cursor object to search for tweets
+tweets = tweepy.Cursor(api.search_tweets, q=query).items()
 
-columns = ["Time", "User", "Tweet"]
-
-data = []
-
-for tweet in public_tweets:
-    data.append([tweet.created_at, tweet.user.screen_name, tweet.text])
-
-df = pd.DataFrame(data, columns=columns)
-
-print(df)
+# Print the text of each tweet
+for tweet in tweets:
+    print(tweet.text)

@@ -1,106 +1,85 @@
 import json
 import re
 
-import pandas
+import pandas as pd
 import requests
 
 
-def fetchDataset():
-    url = (
-        "https://parseapi.back4app.com/classes/City?limit=1512&keys=name,"
-        + +"population,location,cityId"
-    )
+def fetch_dataset():
+    url = "https://parseapi.back4app.com/classes/City?limit=1512&keys=name,population,location,cityId"
     headers = {
-        # This is the fake app's application id
         "X-Parse-Application-Id": "WHhatLdoYsIJrRzvkD0Y93uKHTX49V9gmHgp8Rw3",
-        # This is the fake app's readonly master key
         "X-Parse-Master-Key": "iyzSAHUmPKUzceWRIIitUD1OKAGHvVUzEYb5DCpj",
     }
-    dict = json.loads(requests.get(url, headers=headers).content.decode("utf-8"))
-    df = pandas.DataFrame(dict["results"])
-    # df = pd.from_dict(dict)
+    dict_data = json.loads(requests.get(url, headers=headers).content.decode("utf-8"))
+    df = pd.DataFrame(dict_data["results"])
     print(f"COUNT: {df.count()}")
     print(f"COLUMNS: {df.columns}")
     print(df.head())
     df.to_csv("ukraine_cities.csv", encoding="utf-8")
 
 
-def modifyDataset():
+def modify_dataset():
     pattern = r"[0-9.]+"
-    df = pandas.read_csv("ukraine_cities.csv", engine="python")
-    df["name"] = df["name"].apply(lambda x: x.lower())
+    df = pd.read_csv("ukraine_cities.csv", engine="python")
+    df["name"] = df["name"].str.lower()
     df["latitude"] = df["location"].apply(lambda x: re.findall(pattern, x)[0])
     df["longitude"] = df["location"].apply(lambda x: re.findall(pattern, x)[1])
     new_df = df[["name", "population", "latitude", "longitude"]]
     new_df.to_csv("ukraine_cities_cleaned.csv", encoding="utf-8")
 
 
-def LoadUkraineCities():
-    datasets = ["ukraine_cities_cleaned.csv"]  # ,'ukraine_cities.csv'
+def load_ukraine_cities():
+    datasets = ["ukraine_cities_cleaned.csv"]
     for dataset in datasets:
         try:
-            return pandas.read_csv(dataset, engine="python")
-        except Exception:
-            print(f"Dataset {dataset} non è stato trovato")
-    print("Nessun dataset trovato")
+            return pd.read_csv(dataset, engine="python")
+        except FileNotFoundError:
+            print(f"Dataset {dataset} not found")
+    print("No dataset found")
     return False
 
 
-def findCity(cityname):
-    df = LoadUkraineCities()
+def find_city(cityname):
+    df = load_ukraine_cities()
     search = df[df["name"] == cityname.lower()]
-    # if search.empty:
-    #     print("Non è stato trovato il campo")
     return search
 
 
-def getLocation(cityname):
-    city_df = findCity(cityname)
+def get_location(cityname):
+    city_df = find_city(cityname)
     if city_df.empty:
         return False
-    location = {}
-    location["latitude"] = city_df.iloc[0]["latitude"]
-    location["longitude"] = city_df.iloc[0]["longitude"]
+    location = {
+        "latitude": city_df.iloc[0]["latitude"],
+        "longitude": city_df.iloc[0]["longitude"],
+    }
     return location
 
 
-# tipo "41.12,-71.34"
-
-
-def getLocationAsString(cityname):
-    location = getLocation(cityname)
+def get_location_as_string(cityname):
+    location = get_location(cityname)
     if location is False:
         return None
     return f"POINT({location['longitude']} {location['latitude']})"
 
 
-# [float('%.5f' % location['latitude']), float('%.5f' % location['longitude'])]
-
-# POINT(lon lat)
-
-
-def getLocationsAsString(list):
-    # for city in list:
-    #     return getLocationAsString(city)
+def get_locations_as_string(list):
     points_list = []
     for city in list:
-        points_list.append(getLocationAsString(city))
-    if len(points_list) == 0:
+        points_list.append(get_location_as_string(city))
+    if not points_list:
         return None
     return points_list
 
 
-def findCitiesInText(text, minlen=4, maxlen=10):
+def find_cities_in_text(text, min_len=4, max_len=10):
     if not text:
         return
-
     cities = []
-    tokens = [
-        word for word in text.split() if len(word) >= minlen and len(word) <= maxlen
-    ]
-    print(tokens)
+    tokens = [word for word in text.split() if min_len <= len(word) <= max_len]
     for token in tokens:
-        result = findCity(token)
+        result = find_city(token)
         if not result.empty:
             cities.append(result.iloc[0]["name"])
     return cities
@@ -108,13 +87,13 @@ def findCitiesInText(text, minlen=4, maxlen=10):
 
 def test():
     text = "ciao questa non ZybIny è una zlynka città zolochiv"
-    result = findCitiesInText(text)
+    result = find_cities_in_text(text)
     print(result)
     print()
-    print(getLocationsAsString(result))
+    print(get_locations_as_string(result))
 
 
 if __name__ == "__main__":
-    fetchDataset()
-    modifyDataset()
+    fetch_dataset()
+    modify_dataset()
     test()

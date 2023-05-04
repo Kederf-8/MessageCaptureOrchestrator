@@ -4,3 +4,5 @@ config.ini
 docker-compose.yml
 mco_env
 spark/code/__pycache__/
+spark/code/models/
+models
